@@ -1,0 +1,59 @@
+Current stocks in portfolio that I am comfortable with:
+
+# Individual X8:
+    TSLA, MSFT, BA, APPL
+
+# Individual X9:
+
+
+STOCKS I WANT TO SELL:
+
+# Individual X8:
+
+
+# Individual X9:
+    CCL
+
+OKAY WITH HOLDING BUT WANT TO SELL:
+
+# Individual X8:
+    pretty much all of them except ones mentioned above. However, they are all in the loss column
+    I will evaluate stocks at a later date some of them have good P/B so could potentially go up
+    a bit and minimize my losses
+
+
+# Individual X9:
+    DOCU, DIS, Monitor FTHM before sell, HPQ,
+
+
+# Analysis 
+    orderflow, price ladder, volume profile
+    Orderflow: https://www.jumpstarttrading.com/order-flow-trading/ | 
+
+# youtube
+    axia futures, jigsaw trading, chart guys
+
+# Sectors
+    Basic Materials: FMAT
+    Communication Services: FCOM
+    Consumer Cyclical/Discretionary: FDIS
+    Consumer Defensive/Staples: FSTA
+    Energy: FENY
+    Financial: FNCL
+    Healthcare: FHLC
+    Industrials: FIDU
+    Real Estate: FREL
+    Technology: FTEC
+    Utilities: FUTY
+
+# "Disruptive funds invest innovative business models,
+# emerging industries, and technologies that are 
+# changing status quo"
+    Tech: FDTX
+    Medicine: FMED
+    Finance: FDFF
+    Communications: FDCF
+    Metaverse: FMET
+    Real Estate: FPRO
+
+# Alpha Vantage API Key: GOIR6JKN4TW5HNGO

@@ -3,7 +3,7 @@
 
 import requests
 import csv
-
+import time
 
 ##Oil
 month = '2009-01'
@@ -69,7 +69,7 @@ with open("ALUMINUM.csv", "w+") as file:
 
 ##Wheat
 function  = 'WHEAT'
-
+time.sleep(5.2*60)  ## ony allowed 5 api hits a minute
 url = 'https://www.alphavantage.co/query?function=WHEAT&interval=monthly&apikey=GOIR6JKN4TW5HNGO'
 
 r = requests.get(url)
@@ -120,7 +120,7 @@ with open("SUGAR.csv", "w+") as file:
 
 ##COFFEE
 function  = 'COFFEE'
-
+time.sleep(5.1*60)
 url = 'https://www.alphavantage.co/query?function=COFFEE&interval=monthly&apikey=GOIR6JKN4TW5HNGO'
 
 r = requests.get(url)
@@ -144,4 +144,3 @@ with open("ALL_COMMODITIES.csv", "w+") as file:
     for i in data["data"]:
         file.write( i["date"] + "," + i["value"]+ "\n")   
 
-# does not work, running with this yeilds the message ""

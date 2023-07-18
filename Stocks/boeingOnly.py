@@ -48,12 +48,14 @@ data = r.json()
 
 # function = 'EARNINGS'
 
+
 # url = f'https://www.alphavantage.co/query?function={function}&symbol={ticker}&apikey={API_KEY}&month={month}'
 
 # r = requests.get(url)
 # data = r.json()
 BA_BOP_data = data['Technical Analysis: BOP']
 for key in BA_BOP_data.keys():
-    print(key)
+    print(BA_BOP_data[key])
+    
 
 # print(data['Technical Analysis: BOP'])

@@ -1,6 +1,6 @@
 import requests
 import csv
-
+import os
 
 # ticker = "BA"
 
@@ -9,8 +9,9 @@ import csv
 
 # month = '2009-01'
 # function  = 'BOP'
-def csvTechnicalSMA(ticker, name):
-    API_KEY = 'GOIR6JKN4TW5HNGO'
+def csvTechnicalSMA(ticker, time_interval, time_period, series_type, API_KEY):
+    current_folder = os.getcwd()
+
     # series_type can equal close, open, high or low
     # time_period can be 
     technical_indicators = {
@@ -43,7 +44,7 @@ def csvTechnicalSMA(ticker, name):
     'PLUS_DI': f'https://www.alphavantage.co/query?function=PLUS_DI&symbol={ticker}&interval={time_interval}&time_period={time_period}&apikey={API_KEY}',
     'MINUS_DM': f'https://www.alphavantage.co/query?function=MINUS_DM&symbol={ticker}&interval={time_interval}&time_period={time_period}&apikey={API_KEY}',
     'PLUS_DM': f'https://www.alphavantage.co/query?function=PLUS_DM&symbol={ticker}&interval={time_interval}&time_period={time_period}&apikey={API_KEY}',
-    'BBANDS': f'https://www.alphavantage.co/query?function=BBANDS&symbol={ticker}&interval={time_interval}&time_period={time_period}&series_type={series_type}&nbdevup={nbdevup}&nbdevdn={nbdevdn}&apikey={API_KEY}',
+    'BBANDS': f'https://www.alphavantage.co/query?function=BBANDS&symbol={ticker}&interval={time_interval}&time_period={time_period}&series_type={series_type}&nbdevup=2&nbdevdn=2&apikey={API_KEY}',
     'MIDPRICE': f'https://www.alphavantage.co/query?function=MIDPRICE&symbol={ticker}&interval={time_interval}&time_period={time_period}&apikey={API_KEY}',
     'SAR': f'https://www.alphavantage.co/query?function=SAR&symbol={ticker}&interval={time_interval}&acceleration=.01&maximum=.2&apikey={API_KEY}',
     'AD': f'https://www.alphavantage.co/query?function=AD&symbol={ticker}&interval={time_interval}&apikey={API_KEY}',
@@ -66,38 +67,50 @@ def csvTechnicalSMA(ticker, name):
     'HT_DCPHASE': f'https://www.alphavantage.co/query?function=HT_DCPHASE&symbol={ticker}&interval={time_interval}&series_type={series_type}&apikey={API_KEY}',
     'HT_PHASOR': f'https://www.alphavantage.co/query?function=HT_PHASOR&symbol={ticker}&interval={time_interval}&series_type={series_type}&apikey={API_KEY}'
     }
-    for indicator, url in technical_indicators:
+    for indicator, url in technical_indicators.items():
         
         r = requests.get(url)
-    data = r.json()
+        data = r.json()
 
     # fieldnames = ['Date','BOP']
-    filename = f'C:\Users\trist\Documents\moneybags\moneybags\Stocks\csvData\BA_{name}.csv'
+        filename = f'{current_folder}\{ticker}\{indicator}_.csv'
 
-    dates = []
-    values = []
+        dates = []
+        values = []
 
-    data = data[r'Technical Analysis: {name}']
-    for key,value in data.items():
-        # print(key)
-        dates.append(key)
-        # print
-        for k, v in value.items():
-            values.append(v)
+        data = data[f'Technical Analysis: {indicator}']
+        for key,value in data.items():
+            dates.append(key)
+            for k, v in value.items():
+                values.append(v)
 
-    data = list(zip(dates, values))
-
+        data = list(zip(dates, values))
+        # folder_path = f'{current_folder}\{ticker}'
     # Open the file in write mode
-    with open(filename, 'w', newline='') as csvfile:
-        # Create a CSV writer object
-        writer = csv.writer(csvfile)
+        if not os.path.exists(filename):
+            # os.makedirs(folder_path)
+            with open(filename, 'w', newline='') as csvfile:
+                # Create a CSV writer object
+                writer = csv.writer(csvfile)
 
-        # Write the header
-        writer.writerow(['Dates', 'BOP Values'])
+                # Write the header
+                writer.writerow(['Dates', f'{indicator} Values'])
 
-        # Write the data to the CSV file
-        writer.writerows(data)
-csvTechnicalIndicators(function, 'BA', 'BOP')
+                # Write the data to the CSV file
+                writer.writerows(data)
+        else:
+            # The file already exists, so do nothing
+            pass
+
+# API_KEY = 'GOIR6JKN4TW5HNGO'
+API_KEY = 'FVDFYPUKXD8YETUJ'
+ticker = 'BA'
+time_interval = 'daily'
+# time_period = [10, 50, 200]
+time_period = 10
+# series_type = ['close','open','high','low']
+series_type = 'close'
+csvTechnicalSMA(ticker, time_interval, time_period, series_type, API_KEY)
 
 
 

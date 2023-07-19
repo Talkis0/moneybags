@@ -9,38 +9,39 @@ import csv
 
 # month = '2009-01'
 # function  = 'BOP'
-def csvTechnicalIndicators(function, ticker, name):
-    API_KEY = 'GOIR6JKN4TW5HNGO'
+def csvTechnicalIndicators(ticker, name):
+    # API_KEY = 'GOIR6JKN4TW5HNGO'
+    # API_KEY = 'FVDFYPUKXD8YETUJ'
     # function={function}&symbol={ticker}&apikey={API_KEY}
-    url = f'https://www.alphavantage.co/query?function={function}&symbol={ticker}&interval=daily&apikey={API_KEY}'
+    url = f'https://www.alphavantage.co/query?function={name}&symbol={ticker}&interval=daily&apikey={API_KEY}'
 
     r = requests.get(url)
     data = r.json()
-
+    print(data)
     # fieldnames = ['Date','BOP']
-    filename = f'C:\Users\trist\Documents\moneybags\moneybags\Stocks\csvData\BA_{name}.csv'
+    # filename = f'C:\Users\trist\Documents\moneybags\moneybags\Stocks\csvData\BA_{name}.csv'
 
-    dates = []
-    values = []
+    # dates = []
+    # values = []
 
-    data = data['Technical Analysis: BOP']
-    for key,value in data.items():
-        # print(key)
-        dates.append(key)
-        # print
-        for k, v in value.items():
-            values.append(v)
+    # data = data['Technical Analysis: BOP']
+    # for key,value in data.items():
+    #     # print(key)
+    #     dates.append(key)
+    #     # print
+    #     for k, v in value.items():
+    #         values.append(v)
 
-    data = list(zip(dates, values))
+    # data = list(zip(dates, values))
 
-    # Open the file in write mode
-    with open(filename, 'w', newline='') as csvfile:
-        # Create a CSV writer object
-        writer = csv.writer(csvfile)
+    # # Open the file in write mode
+    # with open(filename, 'w', newline='') as csvfile:
+    #     # Create a CSV writer object
+    #     writer = csv.writer(csvfile)
 
-        # Write the header
-        writer.writerow(['Dates', 'BOP Values'])
+    #     # Write the header
+    #     writer.writerow(['Dates', 'BOP Values'])
 
-        # Write the data to the CSV file
-        writer.writerows(data)
-csvTechnicalIndicators(function, 'BA', 'BOP')
+    #     # Write the data to the CSV file
+    #     writer.writerows(data)
+csvTechnicalIndicators('BA', 'BOP')

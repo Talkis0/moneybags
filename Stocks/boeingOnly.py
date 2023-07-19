@@ -44,3 +44,24 @@ def csvTechnicalIndicators(function, ticker, name):
         # Write the data to the CSV file
         writer.writerows(data)
 csvTechnicalIndicators(function, 'BA', 'BOP')
+# fieldnames = ['Date','BOP']
+# filename = 'BA_BOP.csv'
+# with open(filename, 'w', newline='') as csvfile:
+#     writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+#     writer.writeheader()
+#     writer.writerows(data)
+
+# print(data)
+
+##################
+
+# function = 'EARNINGS'
+
+
+# url = f'https://www.alphavantage.co/query?function={function}&symbol={ticker}&apikey={API_KEY}&month={month}'
+
+# r = requests.get(url)
+# data = r.json()
+# BA_BOP_data = data['Technical Analysis: BOP']
+# for key in BA_BOP_data.keys():
+#    print(BA_BOP_data[key])

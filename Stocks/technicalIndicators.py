@@ -9,7 +9,7 @@ import csv
 
 # month = '2009-01'
 # function  = 'BOP'
-def csvTechnicalSMA(function, ticker, name):
+def csvTechnicalSMA(ticker, name):
     API_KEY = 'GOIR6JKN4TW5HNGO'
     # series_type can equal close, open, high or low
     # time_period can be 

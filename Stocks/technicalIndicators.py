@@ -69,6 +69,7 @@ def csvTechnicalSMA(ticker, time_interval, time_period, series_type, API_KEY):
     }
     for indicator, url in technical_indicators.items():
         print('indicator',indicator,'\n')
+        dan = 'gay'
         r = requests.get(url)
         data = r.json()
         print(data)

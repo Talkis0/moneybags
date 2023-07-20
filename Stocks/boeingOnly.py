@@ -9,15 +9,20 @@ import csv
 
 # month = '2009-01'
 # function  = 'BOP'
-def csvTechnicalIndicators(ticker, name):
+API_KEY = 'FVDFYPUKXD8YETUJ'
+# def csvTechnicalIndicators(ticker, name):
     # API_KEY = 'GOIR6JKN4TW5HNGO'
     # API_KEY = 'FVDFYPUKXD8YETUJ'
     # function={function}&symbol={ticker}&apikey={API_KEY}
-    url = f'https://www.alphavantage.co/query?function={name}&symbol={ticker}&interval=daily&apikey={API_KEY}'
+url = f'https://www.alphavantage.co/query?function=T3&symbol=BA&interval=weekly&time_period=10&series_type=openy&apikey={API_KEY}'
 
-    r = requests.get(url)
-    data = r.json()
-    print(data)
+r = requests.get(url)
+data = r.json()
+# print(data)
+valuesList = list(data.values())
+print(valuesList[1])
+
+    # print(v[1])
     # fieldnames = ['Date','BOP']
     # filename = f'C:\Users\trist\Documents\moneybags\moneybags\Stocks\csvData\BA_{name}.csv'
 
@@ -44,4 +49,4 @@ def csvTechnicalIndicators(ticker, name):
 
     #     # Write the data to the CSV file
     #     writer.writerows(data)
-csvTechnicalIndicators('BA', 'BOP')
+

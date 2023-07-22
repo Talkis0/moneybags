@@ -34,16 +34,16 @@ OKAY WITH HOLDING BUT WANT TO SELL:
     axia futures, jigsaw trading, chart guys
 
 # Sectors
-    Basic Materials: FMAT
+    Basic Materials: FMAT, 
     Communication Services: FCOM
     Consumer Cyclical/Discretionary: FDIS
     Consumer Defensive/Staples: FSTA
     Energy: FENY
     Financial: FNCL
     Healthcare: FHLC
-    Industrials: FIDU
+    Industrials: FIDU. BA
     Real Estate: FREL
-    Technology: FTEC
+    Technology: FTEC, AAPL
     Utilities: FUTY
 
 # "Disruptive funds invest innovative business models,

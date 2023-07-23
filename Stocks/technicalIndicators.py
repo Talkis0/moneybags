@@ -15,15 +15,15 @@ def csvTechnicalSMA(ticker, time_interval, time_period, series_type, API_KEY):
     # series_type can equal close, open, high or low
     # time_period can be 
     technical_indicators = {
-    # 'SMA': f'https://www.alphavantage.co/query?function=SMA&symbol={ticker}&interval={time_interval}&time_period={time_period}&series_type={series_type}&apikey={API_KEY}',
-    # 'EMA': f'https://www.alphavantage.co/query?function=EMA&symbol={ticker}&interval={time_interval}&time_period={time_period}&series_type={series_type}&apikey={API_KEY}',
-    # 'WMA': f'https://www.alphavantage.co/query?function=WMA&symbol={ticker}&interval={time_interval}&time_period={time_period}&series_type={series_type}&apikey={API_KEY}',
-    # 'DEMA': f'https://www.alphavantage.co/query?function=DEMA&symbol={ticker}&interval={time_interval}&time_period={time_period}&series_type={series_type}&apikey={API_KEY}',
-    # 'TEMA': f'https://www.alphavantage.co/query?function=TEMA&symbol={ticker}&interval={time_interval}&time_period={time_period}&series_type={series_type}&apikey={API_KEY}',
-    # 'TRIMA': f'https://www.alphavantage.co/query?function=TRIMA&symbol={ticker}&interval={time_interval}&time_period={time_period}&series_type={series_type}&apikey={API_KEY}',
-    # 'KAMA': f'https://www.alphavantage.co/query?function=KAMA&symbol={ticker}&interval={time_interval}&time_period={time_period}&series_type={series_type}&apikey={API_KEY}',
-    # 'MAMA': f'https://www.alphavantage.co/query?function=MAMA&symbol={ticker}&interval={time_interval}&series_type={series_type}&fastlimit=.01&apikey={API_KEY}',
-    'T3': f'https://www.alphavantage.co/query?function=VWAP&symbol={ticker}&interval={time_interval}min&apikey={API_KEY}',
+    'SMA': f'https://www.alphavantage.co/query?function=SMA&symbol={ticker}&interval={time_interval}&time_period={time_period}&series_type={series_type}&apikey={API_KEY}',
+    'EMA': f'https://www.alphavantage.co/query?function=EMA&symbol={ticker}&interval={time_interval}&time_period={time_period}&series_type={series_type}&apikey={API_KEY}',
+    'WMA': f'https://www.alphavantage.co/query?function=WMA&symbol={ticker}&interval={time_interval}&time_period={time_period}&series_type={series_type}&apikey={API_KEY}',
+    'DEMA': f'https://www.alphavantage.co/query?function=DEMA&symbol={ticker}&interval={time_interval}&time_period={time_period}&series_type={series_type}&apikey={API_KEY}',
+    'TEMA': f'https://www.alphavantage.co/query?function=TEMA&symbol={ticker}&interval={time_interval}&time_period={time_period}&series_type={series_type}&apikey={API_KEY}',
+    'TRIMA': f'https://www.alphavantage.co/query?function=TRIMA&symbol={ticker}&interval={time_interval}&time_period={time_period}&series_type={series_type}&apikey={API_KEY}',
+    'KAMA': f'https://www.alphavantage.co/query?function=KAMA&symbol={ticker}&interval={time_interval}&time_period={time_period}&series_type={series_type}&apikey={API_KEY}',
+    'MAMA': f'https://www.alphavantage.co/query?function=MAMA&symbol={ticker}&interval={time_interval}&series_type={series_type}&fastlimit=.01&apikey={API_KEY}',
+    'T3': f'https://www.alphavantage.co/query?function=T3&symbol={ticker}&interval={time_interval}&time_period={time_period}&series_type={series_type}&apikey={API_KEY}',
     'MACDEXT': f'https://www.alphavantage.co/query?function=MACDEXT&symbol={ticker}&interval={time_interval}&series_type={series_type}&apikey={API_KEY}',
     'RSI': f'https://www.alphavantage.co/query?function=RSI&symbol={ticker}&interval={time_interval}&time_period={time_period}&series_type={series_type}&apikey={API_KEY}',
     'MOM': f'https://www.alphavantage.co/query?function=MOM&symbol={ticker}&interval={time_interval}&time_period={time_period}&series_type={series_type}&apikey={API_KEY}',
@@ -68,29 +68,33 @@ def csvTechnicalSMA(ticker, time_interval, time_period, series_type, API_KEY):
     'HT_PHASOR': f'https://www.alphavantage.co/query?function=HT_PHASOR&symbol={ticker}&interval={time_interval}&series_type={series_type}&apikey={API_KEY}'
     }
     for indicator, url in technical_indicators.items():
-        print('indicator',indicator,'\n')
-        r = requests.get(url)
-        data = r.json()
-        print(data)
-        valuesList = list(data.values())
-        data = valuesList[1]
-    # fieldnames = ['Date','BOP']
-        filename = f'{current_folder}\{ticker}\{indicator}_.csv'
-
-        dates = []
-        values = []
-
-        # data = data[f'Technical Analysis: {indicator}']
-        for key,value in data.items():
-            dates.append(key)
-            for k, v in value.items():
-                values.append(v)
-
-        data = list(zip(dates, values))
-        # folder_path = f'{current_folder}\{ticker}'
-    # Open the file in write mode
+        print('indicator: ',indicator,'\n')
+        dan = 'gay'
+        if 'time_period' in url:
+            filename = f'{current_folder}\data\industrials\Boeing\{indicator}_{time_period}.csv'
+        else:
+            filename = f'{current_folder}\data\industrials\Boeing\{indicator}.csv'
         if not os.path.exists(filename):
-            # os.makedirs(folder_path)
+            print('indicator in if statement: ',indicator,'\n')
+            r = requests.get(url)
+            data = r.json()
+            print(data,'\n')
+            valuesList = list(data.values())
+            data = valuesList[1]
+
+            dates = []
+            values = []
+
+            # data = data[f'Technical Analysis: {indicator}']
+            for key,value in data.items():
+                dates.append(key)
+                for k, v in value.items():
+                    values.append(v)
+
+            data = list(zip(dates, values))
+            # folder_path = f'{current_folder}\{ticker}'
+        # Open the file in write mode
+                # os.makedirs(folder_path)
             with open(filename, 'w', newline='') as csvfile:
                 # Create a CSV writer object
                 writer = csv.writer(csvfile)
@@ -109,7 +113,7 @@ API_KEY = 'GOIR6JKN4TW5HNGO'
 ticker = 'BA'
 time_interval = 'daily'
 # time_period = [10, 50, 200]
-time_period = 10
+time_period = 200
 # series_type = ['close','open','high','low']
 series_type = 'close'
 csvTechnicalSMA(ticker, time_interval, time_period, series_type, API_KEY)

@@ -16,10 +16,11 @@ def compile_data(folder, output):
     i=1
     for file in files:
         file_path = os.path.join(folder, file)
-        if i>1:
-            data = pd.read_csv(file_path, usecols=lambda column: column != 'Dates')
-        else:
-            data = pd.read_csv(file_path)
+        # if i>1:
+        #     data = pd.read_csv(file_path, usecols=lambda column: column != 'Dates')
+        # else:
+        #     data = pd.read_csv(file_path)
+        data = pd.read_csv(file_path, index_col=0)
         concatenated_data = pd.concat([concatenated_data, data], axis=1)
         i+=1
 
@@ -29,4 +30,7 @@ def compile_data(folder, output):
     print(f"Concatenated data saved to {output}.")
 
 # Example usage:
-compile_data('C:\Projects\moneybags\data\Industrials\Boeing', 'output.csv')
+dirname = os.path.dirname(__file__)
+folder = dirname + '\data\Industrials\Boeing'
+file = folder + '\output.csv'
+compile_data(folder, file)

@@ -32,11 +32,12 @@ def preprocess_text(text):
     processed_text = ' '.join(lemmatized_tokens)
     return processed_text
 
-apiKey = "xhYGBFRLgdMoADaTWdNqKAACEAfEAfO5"
 term = "Boeing"
 # begin_date yyyymmdd
 begin_date = sys.argv[1]
 end_date = sys.argv[2]
+apiKey = sys.argv[3]
+#apiKey = "FD13HtkYJBIbc4AsiIkP6ln8XckWEN6b"
 n_documents = 0
 page_num = 0
 pages_done = False

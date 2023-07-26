@@ -32,7 +32,7 @@ def preprocess_text(text):
     processed_text = ' '.join(lemmatized_tokens)
     return processed_text
 
-apiKey = "7CygHrPQm47XFRVnA6n2jb354HB7RQMG"
+apiKey = "xhYGBFRLgdMoADaTWdNqKAACEAfEAfO5"
 term = "Boeing"
 # begin_date yyyymmdd
 begin_date = sys.argv[1]

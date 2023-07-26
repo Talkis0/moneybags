@@ -8,6 +8,7 @@ from collections import defaultdict
 from dateutil import rrule
 from datetime import datetime
 import sys
+from time import sleep
 
 analyzer = SentimentIntensityAnalyzer()
 def get_sentiment(text):
@@ -34,8 +35,8 @@ def preprocess_text(text):
 apiKey = "7CygHrPQm47XFRVnA6n2jb354HB7RQMG"
 term = "Boeing"
 # begin_date yyyymmdd
-begin_date = "20010101"
-end_date = "20010111"
+begin_date = sys.argv[1]
+end_date = sys.argv[2]
 n_documents = 0
 page_num = 0
 pages_done = False
@@ -52,6 +53,8 @@ try:
         for i in range( len(documents) ):
             document = documents[i]
             pub_date = document['pub_date'].split('T')[0]
+            print(document['pub_date'])
+            print(pub_date)
             description = ' '.join( [ document['abstract'], document['snippet'], document['lead_paragraph'] ] )
             description = preprocess_text( description )
             sentiment = get_sentiment( description )
@@ -61,9 +64,13 @@ try:
         page_num = page_num + 1
         if n_documents >= hits:
             pages_done = True
+        else:
+            sleep(12)
+except Exception as E:
+    print(E)
 finally:
-    with open( '{}.csv'.format(end_date), 'w' ) as outfile:
-        print( 'Dates', 'Sentiment', 'Number of Articles', sep=',', file=outfile )
+    with open( './MarketSentiment/csvData/{}.csv'.format(end_date), 'w' ) as outfile:
+        print( 'Dates', 'Total Sentiment', 'Number of Articles', sep=',', file=outfile )
         for dt in rrule.rrule( rrule.DAILY,
                                 dtstart=datetime.strptime(begin_date, '%Y%m%d'),
                                 until=datetime.strptime(end_date, '%Y%m%d') ):

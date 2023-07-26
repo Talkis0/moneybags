@@ -53,7 +53,6 @@ try:
         for i in range( len(documents) ):
             document = documents[i]
             pub_date = document['pub_date'].split('T')[0]
-            print(document['pub_date'])
             print(pub_date)
             description = ' '.join( [ document['abstract'], document['snippet'], document['lead_paragraph'] ] )
             description = preprocess_text( description )

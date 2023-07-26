@@ -43,7 +43,7 @@ pages_done = False
 sentiment_data = defaultdict( lambda: [0., 0.] )
 try:
     while not pages_done:
-        url = "https://api.nytimes.com/svc/search/v2/articlesearch.json?q={}&sort=newest&api-key={}&begin_date={}&end_date={}?page={}".format( term, apiKey, begin_date, end_date, page_num )
+        url = "https://api.nytimes.com/svc/search/v2/articlesearch.json?q={}&sort=newest&api-key={}&begin_date={}&end_date={}&page={}".format( term, apiKey, begin_date, end_date, page_num )
         res = requests.get( url ).json()
         # res['response']['docs'][0]
         # dict_keys(['abstract', 'web_url', 'snippet', 'lead_paragraph', 'source', 'multimedia', 'headline', 'keywords', 'pub_date', 'document_type', 'news_desk', 'section_name', 'byline', 'type_of_material', '_id', 'word_count', 'uri'])

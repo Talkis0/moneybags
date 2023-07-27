@@ -2,6 +2,7 @@ import os
 import requests
 import numpy as np
 import pandas as pd
+import time
 import csv
 
 #%% Collect and concatenate daily data from a given folder
@@ -19,64 +20,84 @@ def compile_data(folder, output):
     i=1
     for file in files:
         file_path = os.path.join(folder, file)
-        # if i>1:
-        #     data = pd.read_csv(file_path, usecols=lambda column: column != 'Dates')
-        # else:
-        #     data = pd.read_csv(file_path)
         data = pd.read_csv(file_path, index_col=0)
+
+        #1. interval = int_start & int_stop
+        #2. if time interval =/= daily:
+        #3.     interpolate to the # trading days between int_start & int_stop
+
         concatenated_data = pd.concat([concatenated_data, data], axis=1)
         i+=1
 
     # Write the concatenated data to the output file
-    print(concatenated_data)
+    concatenated_data = concatenated_data.dropna()
     concatenated_data.to_csv(output)
     print(f"Concatenated data saved to {output}.")
 
 #%% Query ETF price data
-def etf_query(*symbols, destination = '/ETF_daily' ):
+def etf_query(folder, *symbols):
+    query_limit = 'Thank you for using Alpha Vantage! Our standard API call frequency is 5 calls per minute and 100 calls per day. Please visit https://www.alphavantage.co/premium/ if you would like to target a higher API call frequency.'
     dirname = os.path.dirname(__file__)
     if len(symbols) == 0:
         symbols = ['BIL', 'ACWV', 'BNDW', 'FREL', 'GLDM', 'GLOF', 'PDBC', 'RSP', 'SCHP', 'VT']
 
-    API_KEY = 'GOIR6JKN4TW5HNGO'
+    KEY = pd.read_csv('keys.csv', header=None).to_numpy().ravel()
+    print(KEY.shape[0])
+    idx = 0
+    n_keys = KEY.shape[0]
+    API_KEY = KEY[idx]
     
     for symbol in symbols:
-        url = f'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol={symbol}&outputsize=full&apikey={API_KEY}'
+        print(API_KEY)
+        url = f'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol={symbol}&outputsize=full&apikey={API_KEY}'
         response = requests.get(url)
         data = response.json()
 
         # Extract the time series data
+        if 'Note' in data:
+            print(data['Note'])
+            if data['Note'] == query_limit:
+                # incomplete
+                idx = (idx+1)%n_keys
+                API_KEY = KEY[idx]
+                print(API_KEY)
+                url = f'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol={symbol}&outputsize=full&apikey={API_KEY}'
+                response = requests.get(url)
+                data = response.json()
+                if 'Note' not in data:
+                    print('Good thing Alphavantage is my bitch')
+
         time_series = data['Time Series (Daily)']
 
-        if 'Error Message' in data:
-            print('An error occurred:', data['Error Message'])
-
         # Prepare CSV file for writing
-        folder = dirname + '\ETF_daily'
         filename = folder + f'\{symbol}.csv'
         with open(filename, 'w', newline='') as file:
             writer = csv.writer(file)
-            writer.writerow(['Open', 'High', 'Low', 'Close','Adjusted Close', 'Volume', 'Dividend Amount', 'Split Coefficient'])
+            writer.writerow([symbol])
 
             # Write each data point to CSV
             for timestamp, values in time_series.items():
-                row = [timestamp, values['1. open'], values['2. high'], values['3. low'], values['4. close'], values['5. adjusted close'], values['6. volume'], values['7. dividend amount'], values['8. split coefficient']]
+                row = [timestamp, values['4. close']]
                 writer.writerow(row)
     
-    folder = dirname + destination
-    file = folder + '/all_etf_data.csv'
-    compile_data(folder, file)
 
 #%% Query Stock data
 def stock_price_data(symbol, destination):
+    query_limit = 'Thank you for using Alpha Vantage! Our standard API call frequency is 5 calls per minute and 100 calls per day. Please visit https://www.alphavantage.co/premium/ if you would like to target a higher API call frequency.'
     dirname = os.path.dirname(__file__)
-    folder = dirname + destination
-    filename = folder + f'\{symbol}.csv'
+    filename = destination + f'\{symbol}.csv'
     API_KEY = 'GOIR6JKN4TW5HNGO'
 
-    url = f'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol={symbol}&outputsize=full&apikey={API_KEY}'
+    url = f'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol={symbol}&outputsize=full&apikey={API_KEY}'
     response = requests.get(url)
     data = response.json()
+
+    if data['Note'] == query_limit:
+            # incomplete
+            API_KEY = API_KEY
+            url = f'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol={symbol}&outputsize=full&apikey={API_KEY}'
+            response = requests.get(url)
+            data = response.json()
 
     # Extract the time series data
     time_series = data['Time Series (Daily)']
@@ -84,23 +105,28 @@ def stock_price_data(symbol, destination):
     # Prepare CSV file for writing
     with open(filename, 'w', newline='') as file:
         writer = csv.writer(file)
-        writer.writerow(['Open', 'High', 'Low', 'Close','Adjusted Close', 'Volume', 'Dividend Amount', 'Split Coefficient'])
+        writer.writerow(['Open', 'High', 'Low', 'Close', 'Volume'])
 
         # Write each data point to CSV
         for timestamp, values in time_series.items():
-            row = [timestamp, values['1. open'], values['2. high'], values['3. low'], values['4. close'], values['5. adjusted close'], values['6. volume'], values['7. dividend amount'], values['8. split coefficient']]
+            row = [timestamp, values['1. open'], values['2. high'], values['3. low'], values['4. close'], values['5. volume']]
             writer.writerow(row)
 
 #%% Query all indicators for a given stock
-def stock_indicators(ticker, time_period):
+def stock_indicators(ticker, folder):
+    query_limit = 'Thank you for using Alpha Vantage! Our standard API call frequency is 5 calls per minute and 100 calls per day. Please visit https://www.alphavantage.co/premium/ if you would like to target a higher API call frequency.'
     time_interval = 'daily'
     series_type = 'close'
     API_KEY = 'GOIR6JKN4TW5HNGO'
-    time_period = [10, 50, 200]
-    current_folder = os.getcwd()
-    # print()
-    # series_type can equal close, open, high or low
-    # time_period can be 
+    # gotta figure out iterating between time_periods
+    time_period = 10
+
+    KEY = pd.read_csv('keys.csv', header=None).to_numpy().ravel()
+    print(KEY.shape[0])
+    idx = 0
+    n_keys = KEY.shape[0]
+    API_KEY = KEY[idx]
+
     technical_indicators = {
     'SMA': f'https://www.alphavantage.co/query?function=SMA&symbol={ticker}&interval={time_interval}&time_period={time_period}&series_type={series_type}&apikey={API_KEY}',
     'EMA': f'https://www.alphavantage.co/query?function=EMA&symbol={ticker}&interval={time_interval}&time_period={time_period}&series_type={series_type}&apikey={API_KEY}',
@@ -158,37 +184,45 @@ def stock_indicators(ticker, time_period):
     for indicator, url in technical_indicators.items():
         print('indicator: ',indicator,'\n')
         if 'time_period' in url:
-            filename = f'{current_folder}\data\industrials\Boeing\{indicator}_{time_period}.csv'
+            filename = f'{folder}\{indicator}_{time_period}.csv'
         else:
-            filename = f'{current_folder}\data\industrials\Boeing\{indicator}.csv'
+            filename = f'{folder}\{indicator}.csv'
         if not os.path.exists(filename):
             print('indicator in if statement: ',indicator,'\n')
             r = requests.get(url)
             data = r.json()
-            print(data,'\n')
+
+            if 'Note' in data:
+                print(data['Note'])
+                if data['Note'] == query_limit:
+                    # incomplete
+                    idx = (idx+1)%n_keys
+                    API_KEY = KEY[idx]
+                    print(API_KEY)
+                    url = f'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol={ticker}&outputsize=full&apikey={API_KEY}'
+                    response = requests.get(url)
+                    data = response.json()
+                    if 'Note' not in data:
+                        print('Good thing Alphavantage is my bitch')
+
             valuesList = list(data.values())
             data = valuesList[1]
 
             dates = []
             values = []
 
-            # data = data[f'Technical Analysis: {indicator}']
             for key,value in data.items():
                 dates.append(key)
                 for k, v in value.items():
                     values.append(v)
 
             data = list(zip(dates, values))
-            # folder_path = f'{current_folder}\{ticker}'
-        # Open the file in write mode
-                # os.makedirs(folder_path)
+
             with open(filename, 'w', newline='') as csvfile:
                 # Create a CSV writer object
                 writer = csv.writer(csvfile)
-
                 # Write the header
                 writer.writerow(['Dates', f'{indicator} Values'])
-
                 # Write the data to the CSV file
                 writer.writerows(data)
         else:
@@ -201,10 +235,15 @@ if __name__ == "__main__":
     ticker = 'BA'
     dirname = os.path.dirname(__file__)
     folder = dirname + '\data\Industrials\Boeing'
-    file = folder + '\\all_data.csv'
+    file = folder + '/all_data.csv'
 
-    stock_price_data(ticker, folder)
+    print(folder)
+    print(file)
+
     # indicator query still needs to be updated
     # stock_indicators(ticker, folder)
-    etf_query()
-    compile_data(folder, file)
+
+    # stock_price_data(ticker, folder)
+    etf_query(folder)
+
+    # compile_data(folder, file)

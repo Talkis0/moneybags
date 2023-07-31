@@ -53,3 +53,5 @@ start_date = '2000-11-01'
 fundamental_data = fundamental_data[fundamental_data.index >= start_date]
 
 print(fundamental_data)
+
+

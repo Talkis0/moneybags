@@ -34,6 +34,40 @@ def compile_data(folder, output):
     concatenated_data.to_csv(output)
     print(f"Concatenated data saved to {output}.")
 
+#%% Interpolation function
+def resample_and_interpolate(folder):
+    files = [file for file in os.listdir(folder) if file.endswith('.csv')]
+    if not files:
+        print("No CSV files found in the folder.")
+        return 
+    df_dict = {}
+    for file in files:
+        file_path = os.path.join(folder, file)
+        df_dict[file] = pd.read_csv(file_path, index_col=0)
+        df_dict[file].index = pd.to_datetime(df_dict[file].index)
+        mask = df_dict[file].apply(lambda row: all(value == '.' for value in row.values), axis=1)
+        df_dict[file] = df_dict[file][~mask]
+
+    # Find the DataFrame with the most dates
+    max_dates_df = max(df_dict.values(), key=lambda df: len(df))
+    # Resample all other DataFrames to have the same dates as max_dates_df
+    for df_name, df in df_dict.items():
+        if df is not max_dates_df:
+            # Convert all columns to numeric data types (excluding the index column)
+            for k in df.columns:
+                if not (df.index.name == k):
+                    df[k] = df[k].astype(float)
+            
+            # Perform interpolation on numeric columns
+            df_resampled = df.reindex(max_dates_df.index).interpolate(method='time')
+            # Drop rows with missing values
+            df_resampled.dropna(inplace=True)
+            df_dict[df_name] = df_resampled
+
+    for df_name, df in df_dict.items():
+        output_file_path = f"{folder}/{df_name}"
+        df.to_csv(output_file_path)
+
 #%% Query ETF price data
 def etf_query(folder, *symbols):
     query_limit = 'Thank you for using Alpha Vantage! Our standard API call frequency is 5 calls per minute and 100 calls per day. Please visit https://www.alphavantage.co/premium/ if you would like to target a higher API call frequency.'
@@ -240,10 +274,12 @@ if __name__ == "__main__":
     print(folder)
     print(file)
 
+    resample_and_interpolate('MacroEcon')
+
     # indicator query still needs to be updated
     # stock_indicators(ticker, folder)
 
     # stock_price_data(ticker, folder)
-    etf_query(folder)
+    # etf_query(folder)
 
     # compile_data(folder, file)

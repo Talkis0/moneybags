@@ -37,7 +37,6 @@ def aggregate_duplicate_times( rows ):
         elif ( r[0] == '10-Q' ) and ( best_form == '10-Q' ) and ( best_val > r[1] ):
             best_val = r[1]
     return best_val
-
 assets_df = pd.Series( [ ( a['form'], a['val'] ) for a in assets_raw ], index=pd.to_datetime( [ a['filed'] for a in assets_raw ] ) )
 assets_df = assets_df.groupby( assets_df.index ).agg( aggregate_duplicate_times )
 se_df = pd.Series( [ ( a['form'], a['val'] ) for a in se_raw ], index=pd.to_datetime( [ a['filed'] for a in se_raw ] ) )
@@ -47,8 +46,14 @@ eps_diluted_df = eps_diluted_df.groupby( eps_diluted_df.index ).agg( aggregate_d
 n_shares_diluted_df = pd.Series( [ ( a['form'], a['val'] ) for a in n_shares_diluted_raw ], index=pd.to_datetime( [ a['filed'] for a in n_shares_diluted_raw ] ) )
 n_shares_diluted_df = n_shares_diluted_df.groupby( n_shares_diluted_df.index ).agg( aggregate_duplicate_times )
 
+# Combine
 fundamentals_df = pd.DataFrame({})
 fundamentals_df['assets'] = assets_df
-fundamentals_df['stockholders_equity'] = se_df
+fundamentals_df['book_value'] = se_df
 fundamentals_df['eps_diluted'] = eps_diluted_df
 fundamentals_df['n_shares_diluted'] = n_shares_diluted_df
+fundamentals_df['liabilities'] = fundamentals_df['assets'] - fundamentals_df['book_value']
+fundamentals_df['bvps_diluted'] = fundamentals_df['book_value'] / fundamentals_df['n_shares_diluted']
+
+# Print to CSV
+fundamentals_df.to_csv('.\csvData\{}.csv'.format(CIK))

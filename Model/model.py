@@ -9,8 +9,9 @@ from scipy.stats import kstest
 sns.set_style('darkgrid')
 data = pd.read_csv('../Stocks_daily/BA.csv')
 data.index = pd.to_datetime( data.index )
-data['Next_Close'] = data['Close'].shift(-1) 
+data['Next_Close'] = data['Close'].shift(1) 
 data = data.dropna()
+data = data.sort_index( ascending=True )
 input_vars = ['Open', 'High', 'Low', 'Close']
 output_var = 'Next_Close'
 X = data[ input_vars ]

@@ -7,7 +7,7 @@ from sklearn.linear_model import LogisticRegressionCV
 from sklearn.model_selection import train_test_split
 sns.set_style('darkgrid')
 # Data Cleaning
-data = pd.read_csv('../Stocks_daily/BIL.csv', index_col=0)
+data = pd.read_csv('../Stocks_daily/BA.csv', index_col=0)
 data.index = pd.to_datetime( data.index, format='%Y-%m-%d' )
 data.sort_index( inplace=True, ascending=True )
 data['Close.lag1'] = data['Close'].shift(1)
@@ -17,8 +17,12 @@ data['Close.lag6'] = data['Close'].shift(6)
 data['Close.lag8'] = data['Close'].shift(8)
 data['Close.next'] = data['Close'].shift(-1) 
 data['Buy'] = np.where( data['Close.next'] > data['Close'], 1, 0 )
+sentiment_data = pd.read_csv('../MarketSentiment/csvData/BA/BA.csv', index_col=0)
+sentiment_data.index = pd.to_datetime( sentiment_data.index, format='%Y-%m-%d' )
+data['Sentiment'] = sentiment_data['Total Sentiment']
+data['Number of Articles'] = sentiment_data['Number of Articles']
 data = data.dropna()
-input_vars = ['Close', 'Close.lag1', 'Close.lag2', 'Close.lag4', 'Close.lag8']
+input_vars = ['Close', 'Close.lag1', 'Close.lag2', 'Close.lag4', 'Close.lag8', 'Sentiment', 'Number of Articles']
 output_var = 'Buy'
 # Training
 X = data[ input_vars ]

@@ -3,7 +3,8 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plot
 from sklearn.metrics import precision_score, recall_score, accuracy_score, roc_auc_score, roc_curve
-from sklearn.linear_model import LogisticRegressionCV, LinearRegression
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LogisticRegressionCV, LinearRegression, LassoCV
 from sklearn.model_selection import train_test_split
 from scipy.stats import probplot, norm
 sns.set_style('darkgrid')
@@ -22,14 +23,24 @@ sentiment_data = pd.read_csv('../MarketSentiment/csvData/BA/BA.csv', index_col=0
 sentiment_data.index = pd.to_datetime( sentiment_data.index, format='%Y-%m-%d' )
 data['Sentiment'] = sentiment_data['Total Sentiment']
 data['Number of Articles'] = sentiment_data['Number of Articles']
+fundamentals_data = pd.read_csv('../Fundamentals/csvData/BA.csv', index_col=0)
+fundamentals_data.index = pd.to_datetime( fundamentals_data.index, format='%Y-%m-%d' )
+fundamentals_data = fundamentals_data.resample('D').ffill()
+data['Earnings'] = fundamentals_data['eps_diluted']
+data['Book Value'] = fundamentals_data['bvps_diluted']
 data = data.dropna()
-input_vars = ['Close', 'Sentiment', 'Number of Articles', 'Volume']
+input_vars = ['Close', 'Sentiment', 'Number of Articles', 'Volume', 'Earnings', 'Book Value']
 output_var = 'Close.next'
 # Training
 X = data[ input_vars ]
 y = data[ output_var ]
 X_train, X_test, y_train, y_test, idx_train, idx_test = train_test_split( X, y, data.index, shuffle=False, train_size=0.7 )
 regr = LinearRegression()
+InputScaler = StandardScaler()
+InputScaler.fit( X_train )
+X_train = InputScaler.transform( X_train )
+X_test = InputScaler.transform( X_test )
+X = InputScaler.transform( X )
 regr.fit(X_train, y_train)
 y_hat = regr.predict( X )
 data['Buy.estimate'] = np.where( y_hat > data['Close'], 1, 0 )

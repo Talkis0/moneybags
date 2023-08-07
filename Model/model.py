@@ -3,8 +3,9 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plot
 from sklearn.metrics import precision_score, recall_score, accuracy_score, roc_auc_score, roc_curve
-from sklearn.linear_model import LogisticRegressionCV
+from sklearn.linear_model import LogisticRegressionCV, LinearRegression
 from sklearn.model_selection import train_test_split
+from scipy.stats import probplot, norm
 sns.set_style('darkgrid')
 # Data Cleaning
 data = pd.read_csv('../Stocks_daily/BA.csv', index_col=0)
@@ -22,41 +23,49 @@ sentiment_data.index = pd.to_datetime( sentiment_data.index, format='%Y-%m-%d' )
 data['Sentiment'] = sentiment_data['Total Sentiment']
 data['Number of Articles'] = sentiment_data['Number of Articles']
 data = data.dropna()
-input_vars = ['Close', 'Close.lag1', 'Close.lag2', 'Close.lag4', 'Close.lag8', 'Sentiment', 'Number of Articles']
-output_var = 'Buy'
+input_vars = ['Close', 'Sentiment', 'Number of Articles', 'Volume']
+output_var = 'Close.next'
 # Training
 X = data[ input_vars ]
 y = data[ output_var ]
 X_train, X_test, y_train, y_test, idx_train, idx_test = train_test_split( X, y, data.index, shuffle=False, train_size=0.7 )
-regr = LogisticRegressionCV(cv=5, tol=1e-5, max_iter=100000, class_weight='balanced').fit(X_train, y_train)
-# Testing
+regr = LinearRegression()
+regr.fit(X_train, y_train)
 y_hat = regr.predict( X )
-data['Buy.estimate'] = y_hat
-# Report Metrics
-print('UNIQUE PREDICTED:', data['Buy.estimate'].loc[idx_test].unique())
-print('UNIQUE ACTUAL:', y.unique())
-test_accuracy = accuracy_score( data['Buy'].loc[idx_test], data['Buy.estimate'].loc[idx_test] )
-test_precision = precision_score( data['Buy'].loc[idx_test], data['Buy.estimate'].loc[idx_test] )
-test_recall = recall_score( data['Buy'].loc[idx_test], data['Buy.estimate'].loc[idx_test] )
-print( 'Test Accuracy:', test_accuracy )
-print( 'Test Precision:', test_precision )
-print( 'Test Recall:', test_recall )
-# Plot residual statistics# predict probabilities
-lr_probs = regr.predict_proba(X_test)
-# keep probabilities for the positive outcome only
-lr_probs = lr_probs[:, 1]
-# calculate scores
-lr_auc = roc_auc_score(data['Buy'].loc[idx_test], lr_probs)
-# summarize scores
-print('Linear: ROC AUC=%.3f' % (lr_auc))
-# calculate roc curves
-lr_fpr, lr_tpr, _ = roc_curve(data['Buy'].loc[idx_test], lr_probs)
-# plot the roc curve for the model
-plot.plot(lr_fpr, lr_tpr, marker='.', label='Linear')
-# axis labels
-plot.xlabel('False Positive Rate')
-plot.ylabel('True Positive Rate')
-# show the legend
-plot.legend()
-# show the plot
+data['Buy.estimate'] = np.where( y_hat > data['Close'], 1, 0 )
+print( accuracy_score( data['Buy'], data['Buy.estimate'] ) )
+print( precision_score( data['Buy'], data['Buy.estimate'] ) )
+print( recall_score( data['Buy'], data['Buy.estimate'] ) )
+residual = data['Close'] - y_hat
+plot.figure()
+plot.suptitle('$E[\epsilon] = {:.3f}; Var[\epsilon] = {:.3f}$'.format( np.mean(residual), np.var(residual) ))
+plot.subplot(3,2,1)
+plot.plot( data.index, data['Close'] )
+plot.plot( data.index, y_hat )
+plot.ylabel('Closing Price')
+plot.subplot(3,2,2)
+plot.plot( data.index, data['Close'] - y_hat )
+plot.ylabel('Residual')
+plot.subplot(3,2,3)
+t = np.linspace( residual.min(), residual.max(), 1000 )
+plot.hist( residual, density=True )
+plot.plot( t, norm.pdf( t, loc=residual.mean(), scale=residual.std() ), 'r-' )
+plot.ylabel('$P(\epsilon)$')
+plot.subplot(3,2,4)
+plot.scatter( y_hat, residual, s=0.5 )
+plot.ylabel('Residual')
+plot.xlabel('Fitted')
+plot.subplot(3,2,5)
+probplot( (residual - np.mean(residual)) / np.std(residual), plot=plot )
+plot.subplot(3,2,6)
+plot.scatter( y, y_hat, s=0.5 )
+plot.ylabel( 'Fitted' )
+plot.xlabel( 'True' )
+plot.tight_layout()
 plot.show()
+for var in input_vars:
+    plot.figure()
+    plot.scatter( data[var], residual )
+    plot.ylabel('Residual')
+    plot.xlabel(var)
+    plot.savefig(var+'.png')

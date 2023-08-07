@@ -1,13 +1,14 @@
+import numpy as np
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plot
+from sklearn.utils import shuffle
+from sklearn.metrics import precision_score, recall_score, accuracy_score, roc_auc_score, roc_curve
 from sklearn.linear_model import LinearRegression
 from sklearn.neural_network import MLPClassifier
 from sklearn.model_selection import train_test_split
-import pandas as pd
-import matplotlib.pyplot as plot
-import seaborn as sns
-import numpy as np
-from sklearn.metrics import precision_score, recall_score, accuracy_score, roc_auc_score, roc_curve
-from sklearn.utils import shuffle
 sns.set_style('darkgrid')
+# Data Cleaning
 data = pd.read_csv('../Stocks_daily/BA.csv')
 data.index = pd.to_datetime( data.index )
 data.sort_index( inplace=True )
@@ -16,14 +17,17 @@ data['Buy'] = np.where( data['Next_Close'] > data['Close'], 1, 0 )
 data = data.dropna()
 input_vars = ['Open', 'High', 'Low', 'Close']
 output_var = 'Next_Close'
+# Training
 X = data[ input_vars ]
 y = data[ output_var ]
 X_train, X_test, y_train, y_test, idx_train, idx_test = train_test_split( X, y, data.index, train_size=0.7 )
-X_train, y_train = shuffle( X_train, y_train )
+X_train, y_train = shuffle(  X_train, y_train )
 regr = LinearRegression().fit( X_train, y_train )
+# Testing
 y_hat = regr.predict( X )
 data['Next_Close.estimate'] = y_hat
 data['Buy.estimate'] = np.where( data['Next_Close.estimate'] > data['Close'], 1, 0 )
+# Report Metrics
 test_accuracy = accuracy_score( data['Buy'].loc[idx_test], data['Buy.estimate'].loc[idx_test] )
 test_precision = precision_score( data['Buy'].loc[idx_test], data['Buy.estimate'].loc[idx_test] )
 test_recall = recall_score( data['Buy'].loc[idx_test], data['Buy.estimate'].loc[idx_test] )

@@ -20,7 +20,7 @@ output_var = 'Next_Close'
 # Training
 X = data[ input_vars ]
 y = data[ output_var ]
-X_train, X_test, y_train, y_test, idx_train, idx_test = train_test_split( X, y, data.index, train_size=0.7 )
+X_train, X_test, y_train, y_test, idx_train, idx_test = train_test_split( X, y, data.index, shuffle=False, train_size=0.7 )
 X_train, y_train = shuffle(  X_train, y_train )
 regr = LinearRegression().fit( X_train, y_train )
 # Testing

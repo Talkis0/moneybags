@@ -37,8 +37,8 @@ output_var = 'Close.next'
 X = data[ input_vars ]
 y = data[ output_var ]
 X = SplineTransformer(degree=3, knots='quantile').fit_transform(X)
-X_train, X_test, y_train, y_test, idx_train, idx_test = train_test_split( X, y, data.index, shuffle=False, train_size=0.7 )
-regr = MLPRegressor( hidden_layer_sizes=[32, 32, 32, 1], activation='relu', solver='lbfgs', alpha=0.00005, max_iter=1000000000, max_fun=1000000, learning_rate='invscaling', learning_rate_init=1e-6 )
+X_train, X_test, y_train, y_test, idx_train, idx_test = train_test_split( X, y, data.index, shuffle=False, train_size=0.3 )
+regr = MLPRegressor( hidden_layer_sizes=[32, 32, 32, 1], activation='relu', solver='lbfgs', alpha=0.000005, max_iter=1000000000, max_fun=1000000, learning_rate='invscaling', learning_rate_init=1e-15 )
 InputScaler = StandardScaler()
 InputScaler.fit( X_train )
 X_train = InputScaler.transform( X_train )

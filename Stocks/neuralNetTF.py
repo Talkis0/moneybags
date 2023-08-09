@@ -45,7 +45,7 @@ print(data_df.tail(5))
 # raise Exception('this is where the csv file should have been rewritten')
 # print(data_df)
 # Step 2: Split the Data into training and validation sets
-X = data_df[['Open', 'High', 'Low', 'Close', 'Volume', 'EMA 10 Day']]  # Input features (5 columns)
+X = data_df[['Open', 'High', 'Low', 'Close', 'Volume']]  # Input features (5 columns)
 X_close_cur = X['Close']
 y_1weekActual = data_df['Close'].shift(-7)
 y_1_week = data_df['Close'].shift(-7)  # Closing price 1 week in advance (shifted 7 rows up)

@@ -78,11 +78,12 @@ y_3_weeks = y_3_weeks.iloc[21:]
 # print('lengths of X, y_1_week, y_2_week, y_3_week\n', len(X),len(y_1_week), len(y_2_weeks), len(y_3_weeks))
 # print('lengths of X, y_1_week, y_2_week, y_3_week\n', X.index,y_1_week.index, y_2_weeks.index, y_3_weeks.index)
 # Combine the target values into a single DataFrame
-print(y_1_week.index)
-print(y_2_weeks.index)
-print(y_3_weeks.index)
-print(X.index)
+# print(y_1_week.index)
+# print(y_2_weeks.index)
+# print(y_3_weeks.index)
+# print(X.index)
 y = pd.DataFrame({'Close_1_Week': y_1_week.values, 'Close_2_Weeks': y_2_weeks.values, 'Close_3_Weeks': y_3_weeks.values}, index=None)
+print(y)
 # print(X.tail(5))
 # print(y.tail(5))
 # raise Exception('this is where the csv file should have been rewritten')
@@ -90,17 +91,21 @@ y = pd.DataFrame({'Close_1_Week': y_1_week.values, 'Close_2_Weeks': y_2_weeks.va
 scaler = MinMaxScaler()
 X_scaled = scaler.fit_transform(X)
 y_scaled = scaler.fit_transform(y)
-print('length of X_scaled and y_scaled\n', len(X_scaled), len(y_scaled))
+# print('length of X_scaled and y_scaled\n', len(X_scaled), len(y_scaled))
 # with pd.option_context('display.max_rows', None, 'display.max_columns', None):  # more options can be specified also
 #     print(y_2_weeks)
 #     print(len(y_scaled),len(X_scaled))
     # print(y_scaled)
 # Split data into training and validation sets
 X_train, X_val, y_train, y_val = train_test_split(X_scaled, y_scaled, test_size=0.3, random_state=42, shuffle = False)
-print('X_train type',type(X_train))
-print('\nshape of X_train',X_train.shape)
+# print('X_train type',type(X_train))
+# print('\nshape of X_train',X_train.shape)
 length_ = len(y_val)
-
+# print('xval',X_val)
+# print('yval',y_val)
+y_val_actual = scaler.inverse_transform(y_val)
+print(y_val_actual)
+raise Exception('this is where the csv file should have been rewritten')
 # Step 4: Create and Train the Model
 X_train = X_train.reshape(X_train.shape[0],X_train.shape[1],1)
 model = Sequential()
@@ -133,10 +138,12 @@ y_val_actual = scaler.inverse_transform(y_val)
 # y_val_actual = scaler.inverse_transform(y_val)
 
 # Step 7: Plot the Results
+# for i in y_pred[:,0]:
+print()
 from sklearn.metrics import accuracy_score, precision_score, recall_score, roc_auc_score, roc_curve
 one_week_y_pred = y_pred[:, 0]
 one_week_y_actual = y_1weekActual
-print('ength of stuff\n',len(y_1weekActual), len(X_close_cur))
+# print('ength of stuff\n',len(y_1weekActual), len(X_close_cur))
 buy_actual = np.where( y_1weekActual.iloc[-length_:] > X_close_cur[-length_:], 1, 0 )
 # print(one_week_y_actual)
 # print(X_val[:,3])

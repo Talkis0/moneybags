@@ -24,7 +24,10 @@ def compile_data(folder, output):
 
     # Write the concatenated data to the output file
     concatenated_data = concatenated_data.dropna(axis = 0)
-    print(f"Concatenated data saved to {output}.")
+    print(concatenated_data)
+    with open(output, 'w') as file:
+        concatenated_data.to_csv(file, index = True)
+        print(f"Concatenated data writen over and saved to {output}.")
 
 #%% Interpolation function
 def resample_and_interpolate(folder):

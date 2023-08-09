@@ -17,7 +17,7 @@ def estimate_single_mu( series, T ):
     return (series[-1] - series[0]) / T
 
 def estimate_sigma(series, T):
-    window = 365
+    window = 60
     series = series.to_numpy()
     T = T.to_numpy()
     SIGMA = np.sqrt( np.cumsum( np.diff(series, prepend=series[0])**2 ) / T )
@@ -25,7 +25,7 @@ def estimate_sigma(series, T):
     #return np.sqrt( ( np.diff(series)**2 ).sum() / T )
 
 def simple_estimate_mu(series, T):
-    window = 365
+    window = 60
     MU = np.asarray([ ( series[idx] - series[0] ) / t for idx, t in enumerate(T) ])
     return np.asarray( list( np.cumsum(MU[:window]) / np.arange(1, window+1, 1) ) + list( running_mean( MU, window ) ) )
     #return (series[-1] - series[0]) / T
@@ -38,8 +38,14 @@ data.sort_index( inplace=True, ascending=True )
 vix_data = pd.read_csv('../Stocks_daily/VIX.csv', index_col=0)
 vix_data.index = pd.to_datetime( vix_data.index, format='%Y-%m-%d' )
 vix_data.sort_index( inplace=True, ascending=True )
+tenyear_ir_data = pd.read_csv('../Economic_Indicators/TREASURY_YIELD&maturity=10year.csv', index_col=0)
+tenyear_ir_data.index = pd.to_datetime( tenyear_ir_data.index, format='%Y-%m-%d' )
+tenyear_ir_data = tenyear_ir_data.resample('D').ffill()
+tenyear_ir_data.sort_index( inplace=True, ascending=True )
 data['dt'] = data.index.to_series().diff() / timedelta(days=1)
 data['vix'] = vix_data['Close']
+data['10y'] = tenyear_ir_data['Values'].replace()
+data['10y.diff'] = data['10y'].pct_change()
 data['Close'] = data['Adjusted Close'].copy()
 data['Close.next'] = data['Close'].shift(-1) 
 data['Buy'] = np.where( data['Close.next'] > data['Close'], 1, 0 )
@@ -61,7 +67,7 @@ noise = sigma * W
 log_dS = drift + noise
 x = np.exp( log_dS )
 x = x0 * x.cumprod(axis=0)
-
+print(data['10y'])
 plot.subplot(3,2,1)
 plot.plot(x)
 plot.xlabel("$t$")
@@ -77,5 +83,5 @@ plot.scatter( x, data['Close'], s=0.5 )
 plot.xlabel('Fitted')
 plot.ylabel('True')
 plot.subplot(3,2,6)
-plot.plot( data.index, data['vix'] )
+plot.scatter( data['10y'], data['Close'] - x, s=0.5 )
 plot.show()

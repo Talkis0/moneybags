@@ -16,15 +16,19 @@ folder = os.getcwd()
 csvFile = folder + '\\Stocks_daily\\BA.csv'
 # Step 1: Load the Data
 data_df = pd.read_csv(csvFile)
-emaCSV = folder + '\\data\\Industrials\\Boeing\\EMA_10.csv'
+# sentCSV = folder + '\\MarketSentiment\\csvData\BA\BA.csv'
 
-data_EMA = pd.read_csv(emaCSV)
-data_df = data_df.iloc[:-9]
-print(len(data_EMA))
-print(len(data_df))
-data_EMA.set_index(data_EMA.columns[0], inplace = True)
-data_df['EMA 10 Day'] = data_EMA['EMA Values']
-print(data_EMA.tail(5))
+# data_sent = pd.read_csv(sentCSV)
+# data_df = data_df.iloc[:-9]
+# print(len(data_sent))
+# print(len(data_df))
+# data_sent.set_index(data_sent.columns[0], inplace = True)
+# data_df = pd.concat([data_df, data_sent], axis=1)
+# data_df.dropna(inplace = True)
+
+# data_df['netSent'] = data_sent['Total Sentiment']
+# data_df['numArt'] = data_sent['Number of Articles']
+# print(data_EMA.tail(5))
 # newDataName = 'EMA'
 # EMA = []
 # for i in data_EMA:
@@ -37,11 +41,12 @@ print(data_EMA.tail(5))
 # print('\nepoch times: [length, the list]',len(epochTime),epochTime)
 # data_df.set_index(data_df.columns[0], inplace=True)
 # data_df.to_csv(csvFile)
-print(data_df.tail(5))
-print('\n==============\n')
+# print(data_df.tail(5))
+# print('\n==============\n')
 data_df.index = pd.to_datetime( data_df.index, format='%Y-%m-%d' )
 data_df.sort_index( inplace=True )
-print(data_df.tail(5))
+# data_df.to_csv('THISISATEST___.csv')
+# print(data_df.tail(5))
 # raise Exception('this is where the csv file should have been rewritten')
 # print(data_df)
 # Step 2: Split the Data into training and validation sets
@@ -62,19 +67,25 @@ endTrain_index = len(data_df) + 365*10
 
 # Drop rows with NaN values in the target columns due to shifting
 # X = X.dropna()
-print('length before changes\n',len(X),len(y_1_week),len(y_2_weeks),len(y_3_weeks))
-X = X.iloc[21:]
-y_1_week = y_1_week.iloc[14:-7]
-y_2_weeks = y_2_weeks.iloc[7:-14]
-y_3_weeks = y_3_weeks.iloc[:-21]
+# print('length before changes\n',len(X),len(y_1_week),len(y_2_weeks),len(y_3_weeks))
+X = X.iloc[:-21]
+y_1_week = y_1_week.iloc[7:-14]
+y_2_weeks = y_2_weeks.iloc[14:-7]
+y_3_weeks = y_3_weeks.iloc[21:]
 # y_1_week = y_1_week.dropna()
 # y_2_weeks = y_2_weeks.dropna()
 # y_3_weeks = y_3_weeks.dropna()
-print('lengths of X, y_1_week, y_2_week, y_3_week\n', len(X),len(y_1_week), len(y_2_weeks), len(y_3_weeks))
-print('lengths of X, y_1_week, y_2_week, y_3_week\n', X.index,y_1_week.index, y_2_weeks.index, y_3_weeks.index)
+# print('lengths of X, y_1_week, y_2_week, y_3_week\n', len(X),len(y_1_week), len(y_2_weeks), len(y_3_weeks))
+# print('lengths of X, y_1_week, y_2_week, y_3_week\n', X.index,y_1_week.index, y_2_weeks.index, y_3_weeks.index)
 # Combine the target values into a single DataFrame
+print(y_1_week.index)
+print(y_2_weeks.index)
+print(y_3_weeks.index)
+print(X.index)
 y = pd.DataFrame({'Close_1_Week': y_1_week.values, 'Close_2_Weeks': y_2_weeks.values, 'Close_3_Weeks': y_3_weeks.values}, index=None)
-
+# print(X.tail(5))
+# print(y.tail(5))
+# raise Exception('this is where the csv file should have been rewritten')
 # Step 3: Normalize Data
 scaler = MinMaxScaler()
 X_scaled = scaler.fit_transform(X)

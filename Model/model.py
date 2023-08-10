@@ -34,7 +34,7 @@ X = data[ input_vars ]
 y = data[ output_var ]
 X = SplineTransformer(degree=3, knots='quantile').fit_transform(X)
 X_train, X_test, y_train, y_test, idx_train, idx_test = train_test_split( X, y, data.index, shuffle=False, train_size=0.3 )
-regr = MLPRegressor( hidden_layer_sizes=[32, 32, 32, 1], activation='relu', solver='lbfgs', alpha=0.000005, max_iter=1000000000, max_fun=1000000, learning_rate='invscaling', learning_rate_init=1e-18 )
+regr = MLPRegressor( hidden_layer_sizes=[32, 32, 32, 1], activation='relu', solver='lbfgs', alpha=0.000005, max_iter=1000000000, random_state=123020, max_fun=1000000, learning_rate='invscaling', learning_rate_init=1e-18 )
 InputScaler = StandardScaler()
 InputScaler.fit( X_train )
 X_train = InputScaler.transform( X_train )
@@ -47,6 +47,10 @@ data['Buy.estimate'] = np.where( y_hat > data['Close'], 1, 0 )
 print( accuracy_score( data['Buy'], data['Buy.estimate'] ) )
 print( precision_score( data['Buy'], data['Buy.estimate'] ) )
 print( recall_score( data['Buy'], data['Buy.estimate'] ) )
+returns = data[ data['Buy.estimate'] == 1 ]['Close.next'] / data[ data['Buy.estimate'] == 1 ]['Close']
+print(returns)
+print( 'RETURNED', 1000. * np.product(returns[::3]) )
+print( 'PASSIVE', 1000. / data['Close'].iloc[0] * data['Close'].iloc[-1] )
 residual = data['Close'] - y_hat
 plot.figure()
 plot.suptitle('$E[\epsilon] = {:.3f}; Var[\epsilon] = {:.3f}$'.format( np.mean(residual), np.var(residual) ))

@@ -9,7 +9,8 @@ from sklearn.preprocessing import MinMaxScaler
 from keras.layers import Dense, LSTM
 from keras.models import Sequential
 from datetime import datetime
-
+for i in range(0,10):
+    print(i)
 folder = os.getcwd()
 csvFile = folder + '\\Stocks_daily\\BA.csv'
 # Step 1: Load the Data
@@ -71,28 +72,12 @@ y_scaled = scaler.fit_transform(y)
     # print(y_scaled)
 # Split data into training and validation sets
 X_train, X_val, y_train, y_val = train_test_split(X_scaled, y_scaled, test_size=0.3, random_state=42, shuffle = False)
-# print('X_train type',type(X_train))
-# print('\nshape of X_train',X_train.shape)
-X_train_values_close = X_train #scaler.inverse_transform(X_train[:,3])
 
 length_ = len(y_val)
-
-# print(len(y_val),len(X_close[-length_:]))
 X_close_actual = X_close[-length_:]
-# print(length_)
-# print(len(y_train)+length_)
-# print('xval',X_val)
-# print('yval',y_val)
 y_val_actual = scaler.inverse_transform(y_val)
-# print(y_val_actual)
 y_1_week_train_actual = y_val_actual[:,0]
-# print(y_1_week_train_actual)
-# print(scaler.inverse_transform(X_train))
-# raise Exception('dd')
-# print(y_val_actual)
-# print('length y val',len(y_val_actual))
-# print(X_close_cur[-length_:])
-# raise Exception('this is where the csv file should have been rewritten')
+
 # Step 4: Create and Train the Model
 X_train = X_train.reshape(X_train.shape[0],X_train.shape[1],1)
 model = Sequential()
@@ -168,11 +153,42 @@ y_pred = scaler.inverse_transform(y_pred_scaled)
 # plt.show()
 # print(X_close_cur[-length_:].index)
 # raise Exception('Darryl licks butthole')
+y_1_week_test_actual = y_pred[:,0]
+buyReal=False
+buyReal_dic={'buy':[],'sell':[]}
+buyTrain = False
+buyTrain_dic = {'buy':[],'sell':[]}
+for i in range(0,len(X_close_actual)):
+    # print(y_1_week_train_actual[i],X_close_actual[i])
+    if y_1_week_train_actual[i] > X_close_actual[i]:
+        if buyReal == True:
+            pass
+        else:
+            buyReal == True
+            buyReal_dic['buy'].append(X_close_actual[i])
+    if y_1_week_train_actual[i] < X_close_actual[i]:
+        if buyReal == False:
+            pass
+        else:
+            buyReal = False
+            buyReal_dic['sell'].append(X_close_actual[i])
 
 
-for i in X_train_values_close:
-    if y_1_week_train_actual(i) > X_train_values_close:
-        
+    if y_1_week_test_actual[i] > X_close_actual[i]:
+        if buyTrain == True:
+            pass
+        else:
+            buyTrain == True
+            buyTrain_dic['buy'].append(X_close_actual[i])
+    if y_1_week_test_actual[i] < X_close_actual[i]:
+        if buyTrain == False:
+            pass
+        else:
+            buyTrain = False
+            buyTrain_dic['sell'].append(X_close_actual[i])
+
+
+
 for i in range(3):
     plt.figure(figsize=(10, 6))
     plt.subplot(2,1,1)

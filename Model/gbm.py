@@ -21,13 +21,15 @@ def estimate_sigma(series, T):
     series = series.to_numpy()
     T = T.to_numpy()
     SIGMA = np.sqrt( np.cumsum( np.diff(series, prepend=series[0])**2 ) / T )
-    return np.asarray( list( np.cumsum(SIGMA[:window]) / np.arange(1, window+1, 1) ) + list( running_mean( SIGMA, window ) ) )
+    #return np.asarray( list( np.cumsum(SIGMA[:window]) / np.arange(1, window+1, 1) ) + list( running_mean( SIGMA, window ) ) )
+    return SIGMA
     #return np.sqrt( ( np.diff(series)**2 ).sum() / T )
 
 def simple_estimate_mu(series, T):
     window = 60
     MU = np.asarray([ ( series[idx] - series[0] ) / t for idx, t in enumerate(T) ])
-    return np.asarray( list( np.cumsum(MU[:window]) / np.arange(1, window+1, 1) ) + list( running_mean( MU, window ) ) )
+    #return np.asarray( list( np.cumsum(MU[:window]) / np.arange(1, window+1, 1) ) + list( running_mean( MU, window ) ) )
+    return MU
     #return (series[-1] - series[0]) / T
 
 sns.set_style('darkgrid')
@@ -48,6 +50,7 @@ data['10y'] = tenyear_ir_data['Values'].replace()
 data['10y.diff'] = data['10y'].pct_change()
 data['Close'] = data['Adjusted Close'].copy()
 data['Close.next'] = data['Close'].shift(-1) 
+data['Close.next.log'] = np.log( data['Close.next'] / data['Close'] )
 data['Buy'] = np.where( data['Close.next'] > data['Close'], 1, 0 )
 data['Return'] = np.log( data['Close.next'] / data['Close'] )
 data = data.dropna()
@@ -64,16 +67,23 @@ sigma = estimate_sigma( data['Close.log'], data['T'] )
 W = np.random.normal( [0]*n, np.sqrt(data['dt']) )
 drift = ( mu - sigma**2 / 2 ) * data['dt']
 noise = sigma * W
-log_dS = drift + noise
+X = np.vstack( (drift, noise, (data['10y'] - data['10y'].mean()) / data['10y'].std() )).T
+y = data['Close.next.log'] - noise
+from sklearn.neural_network import MLPRegressor
+model = MLPRegressor( hidden_layer_sizes=[64,64,64,], activation='logistic', alpha=0.05, learning_rate='adaptive' )
+model.fit(X, y)
+x_2 = model.predict(X)
+print(x_2, noise+drift)
+log_dS = x_2 + noise# + noise#drift + noise
 x = np.exp( log_dS )
 x = x0 * x.cumprod(axis=0)
-print(data['10y'])
 plot.subplot(3,2,1)
-plot.plot(x)
+plot.plot( data.index, x )
 plot.xlabel("$t$")
 plot.ylabel("$x$")
 plot.subplot(3,2,2)
-plot.plot(data['Close'])
+plot.plot(data.index, data['Close'])
+plot.plot(data.index, x)
 plot.subplot(3,2,3)
 plot.plot( data['Close'] - x )
 plot.subplot(3,2,4)

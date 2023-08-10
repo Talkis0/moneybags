@@ -9,53 +9,21 @@ from sklearn.preprocessing import MinMaxScaler
 from keras.layers import Dense, LSTM
 from keras.models import Sequential
 from datetime import datetime
-# from_date = "2022-03-03 06:00:00"
-# epoch = datetime.strptime(from_date, "%Y-%m-%d %H:%M:%S").timestamp()
 
 folder = os.getcwd()
 csvFile = folder + '\\Stocks_daily\\BA.csv'
 # Step 1: Load the Data
 data_df = pd.read_csv(csvFile)
-# sentCSV = folder + '\\MarketSentiment\\csvData\BA\BA.csv'
 
-# data_sent = pd.read_csv(sentCSV)
-# data_df = data_df.iloc[:-9]
-# print(len(data_sent))
-# print(len(data_df))
-# data_sent.set_index(data_sent.columns[0], inplace = True)
-# data_df = pd.concat([data_df, data_sent], axis=1)
-# data_df.dropna(inplace = True)
-
-# data_df['netSent'] = data_sent['Total Sentiment']
-# data_df['numArt'] = data_sent['Number of Articles']
-# print(data_EMA.tail(5))
-# newDataName = 'EMA'
-# EMA = []
-# for i in data_EMA:
-    
-#     # print(i)
-#     epochTime.append(datetime.strptime(i, '%Y-%m-%d').timestamp())
-# data_df[newDataName] = epochTime
-# data_df.to_csv(csvFile)
-# raise Exception('this is where the csv file should have been rewritten')
-# print('\nepoch times: [length, the list]',len(epochTime),epochTime)
-# data_df.set_index(data_df.columns[0], inplace=True)
-# data_df.to_csv(csvFile)
-# print(data_df.tail(5))
-# print('\n==============\n')
 data_df.index = pd.to_datetime( data_df.index, format='%Y-%m-%d' )
 data_df.sort_index( inplace=True )
-# data_df.to_csv('THISISATEST___.csv')
-# print(data_df.tail(5))
-# raise Exception('this is where the csv file should have been rewritten')
-# print(data_df)
-# Step 2: Split the Data into training and validation sets
+
 X = data_df[['Open', 'High', 'Low', 'Close', 'Volume']]  # Input features (5 columns)
 X_close_cur = X['Close']
-y_1weekActual = data_df['Close'].shift(-7)
-y_1_week = data_df['Close'].shift(-7)  # Closing price 1 week in advance (shifted 7 rows up)
-y_2_weeks = data_df['Close'].shift(-14)  # Closing price 2 weeks in advance (shifted 14 rows up)
-y_3_weeks = data_df['Close'].shift(-21)  # Closing price 3 weeks in advance (shifted 21 rows up) 21 NaN's starting in the first date so based on the first date of the 
+y_1weekActual = data_df['Close']
+y_1_week = data_df['Close']  # Closing price 1 week in advance (shifted 7 rows up)
+y_2_weeks = data_df['Close']  # Closing price 2 weeks in advance (shifted 14 rows up)
+y_3_weeks = data_df['Close'] # Closing price 3 weeks in advance (shifted 21 rows up) 21 NaN's starting in the first date so based on the first date of the 
 y_2weekActual = y_2_weeks
 y_3weekActual = y_3_weeks
 
@@ -69,9 +37,14 @@ endTrain_index = len(data_df) + 365*10
 # X = X.dropna()
 # print('length before changes\n',len(X),len(y_1_week),len(y_2_weeks),len(y_3_weeks))
 X = X.iloc[:-21]
+X_close = X['Close'].values.tolist()
+
 y_1_week = y_1_week.iloc[7:-14]
 y_2_weeks = y_2_weeks.iloc[14:-7]
 y_3_weeks = y_3_weeks.iloc[21:]
+# print('X\n',X,'\ny1', y_1_week,'\ny2', y_2_weeks, '\ny3',y_3_weeks)
+# print('lengths of X, y1, y2, y3',len(X), len(y_1_week), len(y_2_weeks), len(y_3_weeks))
+# raise Exception('dd')
 # y_1_week = y_1_week.dropna()
 # y_2_weeks = y_2_weeks.dropna()
 # y_3_weeks = y_3_weeks.dropna()
@@ -83,7 +56,7 @@ y_3_weeks = y_3_weeks.iloc[21:]
 # print(y_3_weeks.index)
 # print(X.index)
 y = pd.DataFrame({'Close_1_Week': y_1_week.values, 'Close_2_Weeks': y_2_weeks.values, 'Close_3_Weeks': y_3_weeks.values}, index=None)
-print(y)
+# print(y)
 # print(X.tail(5))
 # print(y.tail(5))
 # raise Exception('this is where the csv file should have been rewritten')
@@ -100,12 +73,26 @@ y_scaled = scaler.fit_transform(y)
 X_train, X_val, y_train, y_val = train_test_split(X_scaled, y_scaled, test_size=0.3, random_state=42, shuffle = False)
 # print('X_train type',type(X_train))
 # print('\nshape of X_train',X_train.shape)
+X_train_values_close = X_train #scaler.inverse_transform(X_train[:,3])
+
 length_ = len(y_val)
+
+# print(len(y_val),len(X_close[-length_:]))
+X_close_actual = X_close[-length_:]
+# print(length_)
+# print(len(y_train)+length_)
 # print('xval',X_val)
 # print('yval',y_val)
 y_val_actual = scaler.inverse_transform(y_val)
-print(y_val_actual)
-raise Exception('this is where the csv file should have been rewritten')
+# print(y_val_actual)
+y_1_week_train_actual = y_val_actual[:,0]
+# print(y_1_week_train_actual)
+# print(scaler.inverse_transform(X_train))
+# raise Exception('dd')
+# print(y_val_actual)
+# print('length y val',len(y_val_actual))
+# print(X_close_cur[-length_:])
+# raise Exception('this is where the csv file should have been rewritten')
 # Step 4: Create and Train the Model
 X_train = X_train.reshape(X_train.shape[0],X_train.shape[1],1)
 model = Sequential()
@@ -133,52 +120,59 @@ y_pred_scaled = model.predict(X_val.reshape(X_val.shape[0], X_val.shape[1], 1))
 
 # Step 6: Inverse Transform to Original Scale
 y_pred = scaler.inverse_transform(y_pred_scaled)
-y_val_actual = scaler.inverse_transform(y_val)
+# y_val_actual = scaler.inverse_transform(y_val)
+
 # y_pred = scaler.inverse_transform(y_pred_scaled)
 # y_val_actual = scaler.inverse_transform(y_val)
 
 # Step 7: Plot the Results
 # for i in y_pred[:,0]:
-print()
-from sklearn.metrics import accuracy_score, precision_score, recall_score, roc_auc_score, roc_curve
-one_week_y_pred = y_pred[:, 0]
-one_week_y_actual = y_1weekActual
-# print('ength of stuff\n',len(y_1weekActual), len(X_close_cur))
-buy_actual = np.where( y_1weekActual.iloc[-length_:] > X_close_cur[-length_:], 1, 0 )
-# print(one_week_y_actual)
-# print(X_val[:,3])
-buy_pred = np.where( one_week_y_pred > X_close_cur[-length_:], 1, 0)
-test_accuracy = accuracy_score( buy_actual, buy_pred )
-test_precision = precision_score( buy_actual, buy_pred )
-test_recall = recall_score( buy_actual, buy_pred )
-print( 'Test Accuracy:', test_accuracy )
-print( 'Test Precision:', test_precision )
-print( 'Test Recall:', test_recall )
-# Plot residual statistics# predict probabilities
-ns_probs = [0 for _ in range(len(buy_pred))]
-lr_probs = np.where( buy_pred == 0, 0.49, 0.51 ) #regr.predict_proba(X_test)
-# keep probabilities for the positive outcome only
-#lr_probs = lr_probs[:, 1]
-# calculate scores
-ns_auc = roc_auc_score(buy_actual, ns_probs)
-lr_auc = roc_auc_score(buy_actual, lr_probs)
-# summarize scores
-print('No Skill: ROC AUC=%.3f' % (ns_auc))
-print('Linear: ROC AUC=%.3f' % (lr_auc))
-# calculate roc curves
-ns_fpr, ns_tpr, _ = roc_curve(buy_actual, ns_probs)
-lr_fpr, lr_tpr, _ = roc_curve(buy_actual, lr_probs)
-# plot the roc curve for the model
-plt.plot(ns_fpr, ns_tpr, linestyle='--', label='No Skill')
-plt.plot(lr_fpr, lr_tpr, marker='.', label='Linear')
-# axis labels
-plt.xlabel('False Positive Rate')
-plt.ylabel('True Positive Rate')
-# show the legend
-plt.legend()
-# show the plot
-plt.show()
-print(np.average(np.square([y_val_actual-y_pred])))
+# print()
+# from sklearn.metrics import accuracy_score, precision_score, recall_score, roc_auc_score, roc_curve
+# one_week_y_pred = y_pred[:, 0]
+# one_week_y_actual = y_1weekActual
+# # print('ength of stuff\n',len(y_1weekActual), len(X_close_cur))
+# buy_actual = np.where( y_1weekActual.iloc[-length_:] > X_close_cur[-length_:], 1, 0 )
+# # print(one_week_y_actual)
+# # print(X_val[:,3])
+# buy_pred = np.where( one_week_y_pred > X_close_cur[-length_:], 1, 0)
+# test_accuracy = accuracy_score( buy_actual, buy_pred )
+# test_precision = precision_score( buy_actual, buy_pred )
+# test_recall = recall_score( buy_actual, buy_pred )
+# print( 'Test Accuracy:', test_accuracy )
+# print( 'Test Precision:', test_precision )
+# print( 'Test Recall:', test_recall )
+# # Plot residual statistics# predict probabilities
+# ns_probs = [0 for _ in range(len(buy_pred))]
+# lr_probs = np.where( buy_pred == 0, 0.49, 0.51 ) #regr.predict_proba(X_test)
+# # keep probabilities for the positive outcome only
+# #lr_probs = lr_probs[:, 1]
+# # calculate scores
+# ns_auc = roc_auc_score(buy_actual, ns_probs)
+# lr_auc = roc_auc_score(buy_actual, lr_probs)
+# # summarize scores
+# print('No Skill: ROC AUC=%.3f' % (ns_auc))
+# print('Linear: ROC AUC=%.3f' % (lr_auc))
+# # calculate roc curves
+# ns_fpr, ns_tpr, _ = roc_curve(buy_actual, ns_probs)
+# lr_fpr, lr_tpr, _ = roc_curve(buy_actual, lr_probs)
+# # plot the roc curve for the model
+# plt.plot(ns_fpr, ns_tpr, linestyle='--', label='No Skill')
+# plt.plot(lr_fpr, lr_tpr, marker='.', label='Linear')
+# # axis labels
+# plt.xlabel('False Positive Rate')
+# plt.ylabel('True Positive Rate')
+# # show the legend
+# plt.legend()
+# # show the plot
+# plt.show()
+# print(X_close_cur[-length_:].index)
+# raise Exception('Darryl licks butthole')
+
+
+for i in X_train_values_close:
+    if y_1_week_train_actual(i) > X_train_values_close:
+        
 for i in range(3):
     plt.figure(figsize=(10, 6))
     plt.subplot(2,1,1)

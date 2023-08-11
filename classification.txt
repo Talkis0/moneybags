@@ -1,0 +1,38 @@
+# TensorFlow and tf.keras
+import tensorflow as tf
+
+# Helper libraries
+import numpy as np
+import matplotlib.pyplot as plt
+
+print(tf.__version__)
+
+# Defining these is the hard part
+[train_span, train_labels]      # even years?
+[test_span, test_labels]        # odd years?
+
+model = tf.keras.Sequential([
+    tf.keras.layers.Dense(64, activation='relu'),
+    tf.keras.layers.Dense(128, activation='relu'),
+    tf.keras.layers.Dense(5)
+])
+
+model.compile(optimizer='adam',
+              loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+              metrics=['accuracy'])
+
+model.fit(train_span, train_labels, epochs=10)
+
+test_loss, test_acc = model.evaluate(test_span,  test_labels, verbose=2)
+
+probability_model = tf.keras.Sequential([model, tf.keras.layers.Softmax()])
+
+predictions = probability_model.predict(test_span)
+
+predictions[0]
+
+np.argmax(predictions[0])
+
+test_labels[0]
+
+predictions_single = probability_model.predict(now)

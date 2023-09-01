@@ -29,6 +29,10 @@ for _,_,files in os.walk(folder + '\\data\\Industrials\\Boeing'):
         data = data.resample('D').ffill()
         data.sort_index(inplace = True)
         data.columns.values[0] = file
+        data = (data.mask(data.eq('.'))
+         .groupby(data.index.time)
+         .ffill() #add the parameter limit=1 if you want to fill only one day after
+         .fillna('.'))
         # data.rename(columns={"Values": file}, inplace=True)
         frames.append(data)
 
@@ -46,7 +50,7 @@ all_variable_names = dir()
 #     if var_name != 'data_df':
 #         del globals()[var_name]
 
-data_df = data_df.replace('.', 0)
+# data_df = data_df.replace('.', 0)
 
 column_names = list(data_df.columns.values)
 
